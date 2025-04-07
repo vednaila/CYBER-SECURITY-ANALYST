@@ -1,0 +1,140 @@
+					dns records analysis
+Extract Relevant Fields
+
+>index=* sourcetype=dns_sample | regex _raw="(?i)\b(dns|domain|query|response|port 53)\b"
+
+Identify Anomalies
+
+>index=_* OR index=* sourcetype=dns_sample  | stats count by fqdn
+
+Find the top DNS sources
+
+>index=* sourcetype=dns_sample | top fqdn, src_ip
+
+Investigate Suspicious Domains
+
+>index=* sourcetype=dns_sample fqdn="maliciousdomain.com"
+
+
+
+
+
+
+*********************************************************************************************
+
+
+# Splunk SIEM Log Analysis Projects
+
+This repository contains a collection of projects for analyzing various types of logs using Splunk SIEM. Each project provides a structured guide for uploading sample log files, performing analysis, and gaining insights into specific types of log data.
+
+## Projects
+
+1. [Analyzing DNS Logs Using Splunk SIEM](https://github.com/0xrajneesh/Splunk-Projects-For-Beginners/blob/main/Project%231-analyzing-dns-log-using%20splunk-siem.md): This project provides a step-by-step guide for analyzing DNS (Domain Name System) log files using Splunk SIEM. It covers uploading sample log files, extracting relevant fields, analyzing DNS query patterns, detecting anomalies, and monitoring DNS traffic.
+2. [Analyzing FTP Logs Using Splunk SIEM](https://github.com/0xrajneesh/Splunk-Projects-For-Beginners/blob/main/project%232-analyzing-ftp-logs-using-splunk-siem.md): This project guides you through analyzing FTP (File Transfer Protocol) log files using Splunk SIEM. It includes steps for uploading sample log files, extracting fields, analyzing FTP activity patterns, detecting anomalies, and monitoring FTP traffic.
+3. [Analyzing HTTP Logs Using Splunk SIEM](https://github.com/0xrajneesh/Splunk-Projects-For-Beginners/blob/main/project%233-analyzing-http-logs-using-splunk-siem.md): This project outlines the process of analyzing HTTP (Hypertext Transfer Protocol) log files using Splunk SIEM. It covers uploading sample log files, extracting relevant fields, analyzing HTTP request patterns, detecting anomalies, and monitoring HTTP traffic.
+4. [Analyzing SSH Logs Using Splunk SIEM](https://github.com/0xrajneesh/Splunk-Projects-For-Beginners/blob/main/project%234-analyzing-ssh-logs-using-splunk-siem.md): This project provides a comprehensive guide for analyzing SSH (Secure Shell) log files using Splunk SIEM. It includes steps for uploading sample log files, extracting fields, analyzing SSH activity patterns, detecting anomalies, and correlating SSH logs with other data sources.
+5. [Analyzing Tunnel Logs Using Splunk SIEM](https://github.com/0xrajneesh/Splunk-Projects-For-Beginners/blob/main/project%235-analyzing-tunnel-logs-using-splunk-siem.md): This project demonstrates how to analyze tunnel log traffic (e.g., GRE, IPv4, IPv6) from Zeek IDS using Splunk SIEM. It covers uploading sample log files, performing analysis, detecting anomalies, and correlating tunnel logs with other logs for enhanced threat detection.
+6. [Analyzing SMTP Logs Using Splunk SIEM](https://github.com/0xrajneesh/Splunk-Projects-For-Beginners/blob/main/project%236-analyzing-smtp-logs-using-splunk-siem.md): This project provides a structured approach for analyzing SMTP (Simple Mail Transfer Protocol) log files using Splunk SIEM. It includes steps for uploading sample log files, extracting fields, analyzing email traffic patterns, detecting anomalies, and monitoring SMTP activity.
+7. [Analyzing DHCP Logs Using Splunk SIEM](https://github.com/0xrajneesh/Splunk-Projects-For-Beginners/blob/main/project%237-analyzing-dhcp-logs-using-splunk-siem.md): This project offers guidance on analyzing DHCP (Dynamic Host Configuration Protocol) log files using Splunk SIEM. It covers uploading sample log files, extracting fields, analyzing IP address assignments, detecting anomalies, and monitoring DHCP traffic.
+
+
+
+
+*******************************************************************************************
+
+			Analyzing FTP Log Files Using Splunk SIEM
+
+1. Search for FTP Events
+
+>index=<your_ftp_index> sourcetype=<your_ftp_sourcetype
+
+2. Extract Relevant Fields
+>| rex field=_raw "^(?<timestamp>\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}).*?(?<source_ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*?(?<username>\w+).*?(?<command>[A-Z]+).*?(?<file_path>\/[\w\/.-]+)"
+
+3. Analyze File Transfer Activity
+Determine the frequency and volume of file transfers.
+Identify top users or IP addresses involved in file transfers.
+Analyze the types of files being transferred (e.g., documents, executables, archives).
+Use stats command to calculate statistics such as count, sum, avg, etc.
+4. Detect Anomalies
+Look for unusual patterns in file transfer activity.
+Analyze sudden spikes or drops in file transfer volume.
+Investigate file transfers to or from suspicious IP addresses.
+Use statistical analysis or machine learning models to detect anomalies.
+5. Monitor User Behavior
+Monitor user behavior during file transfers.
+Identify users with multiple failed login attempts or unauthorized access attempts.
+Analyze user activity patterns and deviations from normal behavior.
+
+
+
+*******************************************************************************************
+
+
+			Analyzing HTTP Log Files Using Splunk SIEM
+
+
+1. Search for HTTP Events
+>index=<your_http_index> sourcetype=<your_http_sourcetype>
+
+
+2. Extract Relevant Fields
+>| rex field=_raw "<regex_pattern>"
+
+3. Analyze Web Traffic Patterns
+
+--Determine the distribution of request methods (GET, POST, etc.) to understand web traffic patterns.
+>index=<your_http_index> sourcetype=<your_http_sourcetype>
+| stats count by method
+
+
+--Identify top URLs or endpoints accessed by users.
+>index=<your_http_index> sourcetype=<your_http_sourcetype>
+| top limit=10 uri
+
+
+--Analyze response codes to identify errors or successful requests.
+>index=<your_http_index> sourcetype=<your_http_sourcetype>
+| stats count by status
+
+
+4. Detect Anomalies
+
+Look for unusual patterns in file transfer activity.
+
+>index=<your_http_index> sourcetype=<your_http_sourcetype>
+| timechart span=1h count by _time
+
+
+
+
+Analyze high volumes of error responses:
+
+>index=<your_http_index> sourcetype=<your_http_sourcetype>
+| stats count by status
+| where status >= 400
+
+
+
+Investigate file transfers to or from suspicious IP addresses.
+
+>index=<your_http_index> sourcetype=<your_http_sourcetype>
+| search src_ip="suspicious_ip"
+
+
+5. Monitor User Behavior
+
+Identify users with multiple failed login attempts or unauthorized access attempts:
+
+>index=<your_http_index> sourcetype=<your_http_sourcetype>
+| search action="login" status="failed"
+| stats count by user
+
+
+Analyze user session durations and access patterns:
+
+>index=<your_http_index> sourcetype=<your_http_sourcetype>
+| stats range(_time) as session_duration by session_id
+| stats avg(session_duration) as avg_session_duration by user
+
+
